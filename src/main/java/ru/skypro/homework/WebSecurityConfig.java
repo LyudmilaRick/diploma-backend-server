@@ -1,5 +1,9 @@
 package ru.skypro.homework;
 
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.Contact;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -33,8 +37,7 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf().disable()
+        http.csrf().disable()
                 .authorizeHttpRequests((authz) ->
                         authz
                                 .mvcMatchers(AUTH_WHITELIST).permitAll()
@@ -47,5 +50,19 @@ public class WebSecurityConfig {
     }
 
 
+    @Bean
+    public OpenAPI customOpenAPI() {
+        return new OpenAPI()
+                .info(
+                        new Info()
+                                .title("Platform for Reselling Things")
+                                .version("1.0.0")
+                                .contact(
+                                        new Contact()
+                                                .email("LRick@yandex.ru")
+                                                .name("Lyudmila Rick")
+                                )
+                );
+    }
 }
 

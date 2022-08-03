@@ -1,5 +1,7 @@
 package ru.skypro.homework.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -16,14 +18,16 @@ import ru.skypro.homework.service.AuthService;
 import static ru.skypro.homework.dto.Role.USER;
 
 @Slf4j
-@CrossOrigin(value = "http://localhost:3000")
 @RestController
+@CrossOrigin(value = "http://localhost:3000")
 @RequiredArgsConstructor
+@Tag(name = "Авторизация", description = "Методы регистрации и аутентификации на сайте.")
 public class AuthController {
 
     private final AuthService authService;
 
     @PostMapping("/login")
+    @Operation(summary = "Аутентификация", description = "Позволяет пользователю аутентифицироваться в собственном кабинете на сервере.")
     public ResponseEntity<?> login(@RequestBody LoginReq req) {
         if (authService.login(req.getUsername(), req.getPassword())) {
             return ResponseEntity.ok().build();
@@ -33,6 +37,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
+    @Operation(summary = "Регистрация", description = "Позволяет новому пользователю зарегистрироваться на сервере.")
     public ResponseEntity<?> register(@RequestBody RegisterReq req) {
         Role role = req.getRole() == null ? USER : req.getRole();
         if (authService.register(req, role)) {
