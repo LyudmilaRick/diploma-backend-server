@@ -1,50 +1,77 @@
 package ru.skypro.homework.service.impl;
 
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.UserDetailsManager;
+import java.util.Optional;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.skypro.homework.dto.RegisterReq;
+
+import ru.skypro.homework.dto.CreateUser;
+import ru.skypro.homework.dto.NewPassword;
+import ru.skypro.homework.dto.ResponseWrapperUser;
 import ru.skypro.homework.dto.Role;
+import ru.skypro.homework.dto.User;
+import ru.skypro.homework.models.UserEntity;
+import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.UserService;
 
+@Slf4j
 @Service
 public class UserServiceImpl implements UserService {
 
-    private final UserDetailsManager manager;
+    private final UserRepository repository;
 
-    private final PasswordEncoder encoder;
-
-    public UserServiceImpl(UserDetailsManager manager) {
-        this.manager = manager;
-        this.encoder = new BCryptPasswordEncoder();
+    public UserServiceImpl(UserRepository repository) {
+        this.repository = repository;
     }
 
     @Override
-    public boolean login(String userName, String password) {
-        if (!manager.userExists(userName)) {
-            return false;
-        }
-        UserDetails userDetails = manager.loadUserByUsername(userName);
-        String encryptedPassword = userDetails.getPassword();
-        String encryptedPasswordWithoutEncryptionType = encryptedPassword.substring(8);
-        return encoder.matches(password, encryptedPasswordWithoutEncryptionType);
+    public CreateUser addUser(CreateUser user) {
+        UserEntity entity = new UserEntity(null, user.getEmail(), user.getPassword(), Role.USER, user.getFirstName(), user.getLastName(), user.getEmail(), user.getPhone());
+        UserEntity result = repository.saveAndFlush(entity);
+        return convertDtoCreateUserToUserEntity(result);
     }
 
     @Override
-    public boolean register(RegisterReq registerReq, Role role) {
-        if (manager.userExists(registerReq.getUsername())) {
-            return false;
+    public User getUser(Integer id) {
+        Optional<UserEntity> result = repository.findById(id);
+        if (result.isPresent()) {
+            return new User(result.get());
         }
-        manager.createUser(
-                User.withDefaultPasswordEncoder()
-                        .password(registerReq.getPassword())
-                        .username(registerReq.getUsername())
-                        .roles(role.name())
-                        .build()
-        );
-        return true;
+
+        throw new NullPointerException("User '" + id + "' not found.");
     }
+
+    @Override
+    public ResponseWrapperUser getUsers() {
+        return new ResponseWrapperUser(repository.findAll());
+    }
+
+    @Override
+    public User updateUser(User user) {
+        UserEntity entity = new UserEntity(user.getId(), user.getEmail(), null, Role.USER, user.getFirstName(), user.getLastName(), user.getEmail(), user.getPhone());
+        UserEntity result = repository.save(entity);
+        return convertDtoUserToUserEntity(result);
+    }
+
+    @Override
+    public NewPassword setPassword(String userName, String oldPassword, String newPassword) {
+        //TODO:
+        //.ifPresent(resultPassword::setCurrentPassword);
+        throw new UnsupportedOperationException("Not 'UserServiceImpl.setPassword()' supported yet.");
+    }
+
+    private CreateUser convertDtoCreateUserToUserEntity(UserEntity user) {
+        CreateUser userDto = new CreateUser();
+        userDto.setEmail(user.getEmail());
+        userDto.setFirstName(user.getFirstName());
+        userDto.setLastName(user.getLastName());
+        userDto.setPassword(user.getPassword());
+        userDto.setPhone(user.getPhone());
+        return userDto;
+    }
+
+    private User convertDtoUserToUserEntity(UserEntity user) {
+        return new User(user);
+    }
+
 }

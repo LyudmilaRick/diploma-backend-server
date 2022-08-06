@@ -10,9 +10,9 @@ import lombok.Data;
 @Schema(description = "Данные для создания объявления")
 public class CreateAds {
 
-    @Schema(description = "Тект описания товара по объявлению")
+    @Schema(description = "Текст описания товара по объявлению")
     private String description;
-    @Schema(description = "Содержимое картинки к объявлению")
+    @Schema(description = "Ссылка для скачивания содержимого картинки")
     private String image;
     @Schema(description = "Первичный ключ записи объявления")
     private Integer pk;

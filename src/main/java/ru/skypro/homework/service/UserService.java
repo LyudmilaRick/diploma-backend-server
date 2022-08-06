@@ -1,9 +1,14 @@
 package ru.skypro.homework.service;
 
-import ru.skypro.homework.dto.RegisterReq;
-import ru.skypro.homework.dto.Role;
+import ru.skypro.homework.dto.User;
+import ru.skypro.homework.dto.CreateUser;
+import ru.skypro.homework.dto.NewPassword;
+import ru.skypro.homework.dto.ResponseWrapperUser;
 
 public interface UserService {
-    boolean login(String userName, String password);
-    boolean register(RegisterReq registerReq, Role role);
+    CreateUser addUser(CreateUser user);
+    User getUser(Integer id);
+    ResponseWrapperUser getUsers();
+    User updateUser(User user);
+    NewPassword setPassword(String userName, String oldPassword, String newPassword);
 }

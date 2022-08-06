@@ -11,12 +11,12 @@ import lombok.Data;
 @Schema(description = "Данные комментария к объявлению")
 public class AdsComment {
 
-    @Schema(description = "Идентификатор автора объявления")
-    private Integer author;
-    @Schema(description = "Дата и время создания объявления")
-    private OffsetDateTime createdAt;
     @Schema(description = "Первичный ключ записи объявления")
     private Integer pk;
-    @Schema(description = "Текс комментария")
+    @Schema(description = "Идентификатор автора комментария")
+    private Integer author;
+    @Schema(description = "Дата и время создания комментария")
+    private OffsetDateTime createdAt;
+    @Schema(description = "Текст комментария")
     private String text;
 }

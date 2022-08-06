@@ -2,6 +2,7 @@ package ru.skypro.homework.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import ru.skypro.homework.models.AdsEntity;
 
 /**
  * Структура данных, описывающая данные объявления с информацией об авторе, создавшем его.
@@ -14,11 +15,11 @@ public class FullAds {
     private String authorFirstName;
     @Schema(description = "Фамилия автора объявления")
     private String authorLastName;
-    @Schema(description = "Тект описания товара по объявлению")
+    @Schema(description = "Текст описания товара по объявлению")
     private String description;
     @Schema(description = "Адрес электронной почты автора объявления")
     private String email;
-    @Schema(description = "Содержимое картинки к объявлению")
+    @Schema(description = "Ссылка для скачивания содержимого картинки")
     private String image;
     @Schema(description = "Контактный телефон автора объявления")
     private String phone;
@@ -28,4 +29,8 @@ public class FullAds {
     private Integer price;
     @Schema(description = "Заголовок объявления")
     private String title;
+
+    public FullAds(AdsEntity entity) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
 }

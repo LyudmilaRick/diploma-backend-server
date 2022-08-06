@@ -20,4 +20,5 @@ public class CreateUser {
     private String password;
     @Schema(description = "Контактный телефон пользователя")
     private String phone;
+
 }
