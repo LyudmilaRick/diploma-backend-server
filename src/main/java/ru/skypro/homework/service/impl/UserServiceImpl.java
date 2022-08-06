@@ -1,5 +1,7 @@
 package ru.skypro.homework.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +12,7 @@ import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.ResponseWrapperUser;
 import ru.skypro.homework.dto.Role;
 import ru.skypro.homework.dto.User;
+import ru.skypro.homework.exception.WebNotFoundException;
 import ru.skypro.homework.models.UserEntity;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.UserService;
@@ -35,19 +38,31 @@ public class UserServiceImpl implements UserService {
     public User getUser(Integer id) {
         Optional<UserEntity> result = repository.findById(id);
         if (result.isPresent()) {
-            return new User(result.get());
+            return convertDtoUserToUserEntity(result.get());
+            //return new User(result.get());
         }
 
-        throw new NullPointerException("User '" + id + "' not found.");
+        throw new WebNotFoundException("User '" + id + "' not found.");
     }
 
     @Override
     public ResponseWrapperUser getUsers() {
-        return new ResponseWrapperUser(repository.findAll());
+        List<UserEntity> userEntities = repository.findAll();
+        ResponseWrapperUser wrapperUser = new ResponseWrapperUser();
+        List<User> users = new ArrayList<>(userEntities.size());
+        for (UserEntity item : userEntities) {
+             users.add(convertDtoUserToUserEntity(item));
+        }
+        wrapperUser.setCount(userEntities.size());
+        wrapperUser.setResults(users);
+        return wrapperUser;
     }
 
     @Override
     public User updateUser(User user) {
+        repository.findById(user.getId())
+                  .orElseThrow(() -> new WebNotFoundException("User '" + user.getId() + "' not found."));
+
         UserEntity entity = new UserEntity(user.getId(), user.getEmail(), null, Role.USER, user.getFirstName(), user.getLastName(), user.getEmail(), user.getPhone());
         UserEntity result = repository.save(entity);
         return convertDtoUserToUserEntity(result);
@@ -71,7 +86,13 @@ public class UserServiceImpl implements UserService {
     }
 
     private User convertDtoUserToUserEntity(UserEntity user) {
-        return new User(user);
+        User userDto = new User();
+        userDto.setId(user.getIdUser());
+        userDto.setFirstName(user.getFirstName());
+        userDto.setLastName(user.getLastName());
+        userDto.setEmail(user.getEmail());
+        userDto.setPhone(user.getPhone());
+        return userDto;
     }
 
 }

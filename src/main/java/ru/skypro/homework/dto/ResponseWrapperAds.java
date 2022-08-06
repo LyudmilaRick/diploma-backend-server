@@ -20,11 +20,4 @@ public class ResponseWrapperAds {
     @Schema(description = "Список данных пользователя")
     private List<Ads> results;
 
-    public ResponseWrapperAds(List<AdsEntity> list) {
-        count = list.size();
-        results = new ArrayList<>(count);
-        for (AdsEntity item : list) {
-            results.add(new Ads(item));
-        }
-    }
 }

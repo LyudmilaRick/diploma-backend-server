@@ -17,24 +17,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ControllerAdvice
 public class ExceptionAdvice {
 
-    @ResponseStatus(value=HttpStatus.BAD_REQUEST, reason = "Illegal Argument Exception")
-    @ExceptionHandler(IllegalArgumentException.class)
-    public void handleException(HttpServletRequest req, IllegalArgumentException e) {
-        log.error("Request: " + req.getRequestURL() + " raised: " + e.getMessage());
-    }
-
-    @ResponseStatus(value=HttpStatus.NOT_FOUND, reason = "Not Found Exception")
-    @ExceptionHandler(NullPointerException.class)
-    public void handleException(HttpServletRequest req, NullPointerException e) {
-        log.error("Request: " + req.getRequestURL() + " raised: " + e.getMessage());
-    }
-
-    @ResponseStatus(value=HttpStatus.CONFLICT, reason = "Conflict Exception")
-    @ExceptionHandler(TypeNotPresentException.class)
-    public void handleException(HttpServletRequest req, TypeNotPresentException e) {
-        log.error("Request: " + req.getRequestURL() + " raised: " + e.getMessage());
-    }
-
     @ResponseStatus(value=HttpStatus.NOT_IMPLEMENTED, reason = "Requested operation is not supported.")
     @ExceptionHandler(UnsupportedOperationException.class)
     public void handleException(HttpServletRequest req, UnsupportedOperationException e) {

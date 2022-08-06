@@ -21,19 +21,5 @@ public class Ads {
     private String title;
     @Schema(description = "Ссылка для скачивания содержимого картинки")
     private String image;
-
-    public Ads(AdsEntity entity) {
-        this.pk 		 = entity.getIdAds();
-        this.author 	 = entity.getAuthor().getIdUser();
-        
-        this.price 		 = entity.getPrice().intValue();
-        this.title 		 = entity.getTitle();
-
-        //TODO: Как сформировать ссылку на кортинку?
-        this.image = "";
-
-        //entity.getCreated();
-        //entity.getDescription();
-    }
     
 }

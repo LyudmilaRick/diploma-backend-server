@@ -11,6 +11,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import ru.skypro.homework.dto.*;
+import ru.skypro.homework.exception.WebNotFoundException;
 import ru.skypro.homework.models.AdsEntity;
 import ru.skypro.homework.models.ComEntity;
 import ru.skypro.homework.models.ImgEntity;
@@ -25,20 +26,28 @@ import ru.skypro.homework.repository.UserRepository;
 public class AdsServiceImpl implements AdsService {
 
     private final UserRepository users;
-    private final ImgRepository  images;
-    private final ComRepository  comments;
+    private final ImgRepository images;
+    private final ComRepository comments;
     private final AdsRepository advertisement;
 
     public AdsServiceImpl(UserRepository users, ImgRepository images, ComRepository comments, AdsRepository advertisement) {
-        this.users         = users;
-        this.images        = images;
-        this.comments      = comments;
+        this.users = users;
+        this.images = images;
+        this.comments = comments;
         this.advertisement = advertisement;
     }
 
     @Override
     public ResponseWrapperAds getAllAds() {
-        return new ResponseWrapperAds(advertisement.findAll());
+        List<AdsEntity> adsEntities = advertisement.findAll();
+        ResponseWrapperAds wrapperAds = new ResponseWrapperAds();
+        List<Ads> ads = new ArrayList<>(adsEntities.size());
+        for (AdsEntity item : adsEntities) {
+            ads.add(convertAdsEntityToDtoAds(item));
+        }
+        wrapperAds.setCount(adsEntities.size());
+        wrapperAds.setResults(ads);
+        return wrapperAds;
     }
 
     @Override
@@ -52,7 +61,7 @@ public class AdsServiceImpl implements AdsService {
         if (result.isPresent()) {
             return new FullAds(result.get());
         }
-        throw new NullPointerException("Ads '" + adsKey + "' not found.");
+        throw new WebNotFoundException("Ads '" + adsKey + "' not found.");
     }
 
     @Override
@@ -66,15 +75,18 @@ public class AdsServiceImpl implements AdsService {
 
         AdsEntity entity = new AdsEntity(null, author, created, price, body.getTitle(), body.getDescription());
         AdsEntity result = advertisement.saveAndFlush(entity);
-        return new Ads(result);
+        return convertAdsEntityToDtoAds(result);
     }
 
     @Override
     public Ads updateAds(Integer adsKey, Ads body) {
         UserEntity author = users.getReferenceById(body.getAuthor());
+        advertisement.findById(body.getPk())
+                .orElseThrow(() -> new WebNotFoundException("Ads '" + body.getPk() + "' not found."));
+
         AdsEntity entity = new AdsEntity(body.getPk(), author, null, body.getPrice().doubleValue(), body.getTitle(), null);
         AdsEntity result = advertisement.saveAndFlush(entity);
-        return new Ads(result);
+        return convertAdsEntityToDtoAds(result);
     }
 
     @Override
@@ -84,16 +96,16 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public ResponseWrapperComment getAllComments(Integer adsKey) {
-        List<ComEntity>  comEntity = comments.getAllByAds(adsKey);
-        ResponseWrapperComment comment   = new ResponseWrapperComment();
-        List<AdsComment> adsComments     = new ArrayList<>(comEntity.size());
-        for (ComEntity item : comEntity ) {
+        List<ComEntity> comEntity = comments.getAllByAds(adsKey);
+        ResponseWrapperComment comment = new ResponseWrapperComment();
+        List<AdsComment> adsComments = new ArrayList<>(comEntity.size());
+        for (ComEntity item : comEntity) {
             adsComments.add(convertComEntityToDtoAdsComments(item));
         }
         comment.setCount(comEntity.size());
         comment.setResults(adsComments);
         return comment;
-        }
+    }
 
     @Override
     public AdsComment getComment(Integer adsKey, Integer comKey) {
@@ -134,11 +146,23 @@ public class AdsServiceImpl implements AdsService {
     }
 
     private AdsComment convertComEntityToDtoAdsComments(ComEntity comment) {
-            AdsComment commentDto = new AdsComment();
-            commentDto.setPk(comment.getId());
-            commentDto.setAuthor(comment.getAuthor().getIdUser());
-            commentDto.setCreatedAt(comment.getCreated());
-            commentDto.setText(comment.getText());
-            return commentDto;
+        AdsComment commentDto = new AdsComment();
+        commentDto.setPk(comment.getId());
+        commentDto.setAuthor(comment.getAuthor().getIdUser());
+        commentDto.setCreatedAt(comment.getCreated());
+        commentDto.setText(comment.getText());
+        return commentDto;
+    }
+
+    private Ads convertAdsEntityToDtoAds(AdsEntity entity) {
+        Ads adsDto = new Ads();
+        adsDto.setPk(entity.getIdAds());
+        adsDto.setAuthor(entity.getAuthor().getIdUser());
+
+        adsDto.setPrice(entity.getPrice().intValue());
+        adsDto.setTitle(entity.getTitle());
+        //TODO: Как сформировать ссылку на кортинку?
+        adsDto.setImage("");
+        return adsDto;
     }
 }

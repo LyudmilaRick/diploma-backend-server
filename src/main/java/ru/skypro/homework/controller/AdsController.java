@@ -32,6 +32,7 @@ import ru.skypro.homework.dto.CreateAds;
 import ru.skypro.homework.dto.FullAds;
 import ru.skypro.homework.dto.ResponseWrapperAds;
 import ru.skypro.homework.dto.ResponseWrapperComment;
+import ru.skypro.homework.exception.WebBadRequestException;
 import ru.skypro.homework.service.AdsService;
 
 /**
@@ -134,7 +135,7 @@ public class AdsController {
         log.info("Invoke: {0}({1})", "setImage", file != null ? file.getSize() : 0);
 
         if (file == null) {
-            throw new IllegalArgumentException("Image file content is empty.");
+            throw new WebBadRequestException("Image file content is empty.");
         }
 
         try {

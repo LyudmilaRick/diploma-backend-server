@@ -22,12 +22,4 @@ public class User {
     @Schema(description = "Телефон пользователя")
     private String phone;
 
-    public User(UserEntity entity) {
-        this.id = entity.getIdUser();
-        this.firstName = entity.getFirstName();
-        this.lastName = entity.getLastName();
-        this.email = entity.getEmail();
-        this.phone = entity.getPhone();
-    }
-
 }

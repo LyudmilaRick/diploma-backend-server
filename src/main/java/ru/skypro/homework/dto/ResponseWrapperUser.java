@@ -17,11 +17,4 @@ public class ResponseWrapperUser {
     @Schema(description = "Список данных пользователя")
     private List<User> results;
 
-    public ResponseWrapperUser(List<UserEntity> list) {
-        count = list.size();
-        results = new ArrayList<>(count);
-        for (UserEntity ue: list) {
-            results.add(new User(ue));
-        }
-    }
 }
