@@ -3,13 +3,13 @@ package ru.skypro.homework.models;
 import java.io.Serializable;
 import java.util.Objects;
 import javax.persistence.*;
-import ru.skypro.homework.dto.Role;
 
 /**
  * Класс сущности пользователя сайта.
  */
 @Entity
 @Table(name = "user_data")
+@SuppressWarnings("PersistenceUnitPresent")
 public class UserEntity implements Serializable {
 
     @Id
@@ -17,35 +17,31 @@ public class UserEntity implements Serializable {
     @Column(name = "id_user", unique = true)
     private Integer idUser;
 
-    @Column(name = "username")
+    // уникально поле (индекс) иначе будут добавлять пользователи с одним и темже логином (из-за id_user ключа)
+    @Column(name = "username", nullable = false, unique = true)
     private String username;
-    @Column(name = "password")
-    private String password;
-    
-    @Enumerated(EnumType.STRING)
-    @Column(name = "rolename")
-    private Role rolename;
 
     @Column(name = "first_name")
     private String firstName;
     @Column(name = "last_name")
     private String lastName;
 
+    @Column(name = "email")
     private String email;
+
+    @Column(name = "phone")
     private String phone;
 
-    public UserEntity(Integer id, String username, String password, Role rolename, String firstName, String lastName, String email, String phone) {
-        this.idUser = id;
+    public UserEntity() {
+    }
+
+    public UserEntity(Integer idUser, String username, String firstName, String lastName, String email, String phone) {
+        this.idUser = idUser;
         this.username = username;
-        this.password = password;
-        this.rolename = rolename;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.phone = phone;
-    }
-
-    public UserEntity() {
     }
 
     public Integer getIdUser() {
@@ -62,22 +58,6 @@ public class UserEntity implements Serializable {
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public Role getRolename() {
-        return rolename;
-    }
-
-    public void setRolename(Role rolename) {
-        this.rolename = rolename;
     }
 
     public String getFirstName() {
@@ -114,7 +94,9 @@ public class UserEntity implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(idUser);
+        int hash = 7;
+        hash = 83 * hash + Objects.hashCode(this.idUser);
+        return hash;
     }
 
     @Override
@@ -134,7 +116,7 @@ public class UserEntity implements Serializable {
 
     @Override
     public String toString() {
-        return "UserEntity{" + "id=" + idUser + ", username=" + username + ", password=" + password + ", rolename=" + rolename + ", firstName=" + firstName + ", lastName=" + lastName + ", email=" + email + ", phone=" + phone + '}';
+        return "UserEntity{" + "idUser=" + idUser + ", username=" + username + ", firstName=" + firstName + ", lastName=" + lastName + ", email=" + email + ", phone=" + phone + '}';
     }
 
 }

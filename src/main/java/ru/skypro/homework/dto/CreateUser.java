@@ -7,6 +7,7 @@ import lombok.Data;
  * Структура данных тела запроса на создание учетной записи пользователя.
  */
 @Data
+@Deprecated
 @Schema(description = "Структура тела запроса создание записи пользователя")
 public class CreateUser {
 

@@ -8,85 +8,108 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import ru.skypro.homework.dto.CreateUser;
-import ru.skypro.homework.dto.NewPassword;
-import ru.skypro.homework.dto.ResponseWrapperUser;
-import ru.skypro.homework.dto.Role;
-import ru.skypro.homework.dto.User;
-import ru.skypro.homework.exception.WebNotFoundException;
+import ru.skypro.homework.dto.NewPasswordDto;
+import ru.skypro.homework.dto.ResponseWrapperUserDto;
+import ru.skypro.homework.dto.UserDto;
+import ru.skypro.homework.exceptions.WebNotFoundException;
 import ru.skypro.homework.models.UserEntity;
-import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.UserService;
+import ru.skypro.homework.repository.UserRepository;
 
 @Slf4j
 @Service
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository repository;
+    private final UserRepository users;
 
-    public UserServiceImpl(UserRepository repository) {
-        this.repository = repository;
+    public UserServiceImpl(UserRepository users) {
+        this.users = users;
     }
 
     @Override
+    @Deprecated
     public CreateUser addUser(CreateUser user) {
-        UserEntity entity = new UserEntity(null, user.getEmail(), user.getPassword(), Role.USER, user.getFirstName(), user.getLastName(), user.getEmail(), user.getPhone());
-        UserEntity result = repository.saveAndFlush(entity);
+        UserEntity entity = new UserEntity(null, user.getEmail(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getPhone());
+        UserEntity result = users.saveAndFlush(entity);
         return convertDtoCreateUserToUserEntity(result);
     }
 
     @Override
-    public User getUser(Integer id) {
-        Optional<UserEntity> result = repository.findById(id);
+    public ResponseWrapperUserDto getUsers() {
+        List<UserEntity> userEntities = users.findAll();
+        ResponseWrapperUserDto wrapperUser = new ResponseWrapperUserDto();
+        List<UserDto> usersList = new ArrayList<>(userEntities.size());
+        for (UserEntity item : userEntities) {
+            usersList.add(convertDtoUserToUserEntity(item));
+        }
+        wrapperUser.setCount(userEntities.size());
+        wrapperUser.setResults(usersList);
+        return wrapperUser;
+    }
+
+    @Override
+    public UserDto getUser(Integer id) {
+        Optional<UserEntity> result = users.findById(id);
         if (result.isPresent()) {
             return convertDtoUserToUserEntity(result.get());
-            //return new User(result.get());
         }
 
         throw new WebNotFoundException("User '" + id + "' not found.");
     }
 
     @Override
-    public ResponseWrapperUser getUsers() {
-        List<UserEntity> userEntities = repository.findAll();
-        ResponseWrapperUser wrapperUser = new ResponseWrapperUser();
-        List<User> users = new ArrayList<>(userEntities.size());
-        for (UserEntity item : userEntities) {
-             users.add(convertDtoUserToUserEntity(item));
+    public UserDto getUser(String name) {
+        UserEntity result = users.getByUsername(name);
+        if (result != null) {
+            return convertDtoUserToUserEntity(result);
         }
-        wrapperUser.setCount(userEntities.size());
-        wrapperUser.setResults(users);
-        return wrapperUser;
+
+        throw new WebNotFoundException("User '" + name + "' not found.");
     }
 
     @Override
-    public User updateUser(User user) {
-        repository.findById(user.getId())
-                  .orElseThrow(() -> new WebNotFoundException("User '" + user.getId() + "' not found."));
+    public UserDto updateUser(String username, UserDto user) {
+        UserEntity entity = users.getByUsername(username); // т.к. это авторизованный пользователь, то не надо проверять на null
+        entity.setFirstName(user.getFirstName());
+        entity.setLastName(user.getLastName());
+        entity.setPhone(user.getPhone());
 
-        UserEntity entity = new UserEntity(user.getId(), user.getEmail(), null, Role.USER, user.getFirstName(), user.getLastName(), user.getEmail(), user.getPhone());
-        UserEntity result = repository.save(entity);
+        UserEntity result = users.saveAndFlush(entity);
         return convertDtoUserToUserEntity(result);
     }
 
     @Override
-    public NewPassword setPassword(String userName, String oldPassword, String newPassword) {
-        //TODO:
-        //.ifPresent(resultPassword::setCurrentPassword);
-        throw new UnsupportedOperationException("Not 'UserServiceImpl.setPassword()' supported yet.");
+    public NewPasswordDto setPassword(String userName, String oldPassword, String newPassword) {
+        UserEntity entity = users.getByUsername(userName);
+
+        //TODO: Надо продумать как изменить пароль в БД. Смотрим AuthServiceImpl.register() - manager.updateUser(user);
+        throw new UnsupportedOperationException("TODO: UserServiceImpl.setPassword()");
+
+//        if (entity.getPassword().equals(oldPassword)) {
+//            entity.setPassword(newPassword);
+//            users.saveAndFlush(entity);
+//            NewPasswordDto result = new NewPasswordDto();
+//            result.setNewPassword(newPassword);
+//            result.setCurrentPassword(oldPassword);
+//            return result;
+//        }
+//
+//        throw new WebBadRequestException("Incorrect current password");
     }
 
-    private CreateUser convertDtoCreateUserToUserEntity(UserEntity user) {
+    @Deprecated
+    private static CreateUser convertDtoCreateUserToUserEntity(UserEntity user) {
         CreateUser userDto = new CreateUser();
         userDto.setEmail(user.getEmail());
         userDto.setFirstName(user.getFirstName());
         userDto.setLastName(user.getLastName());
-        userDto.setPassword(user.getPassword());
+//      userDto.setPassword(user.getPassword());
         userDto.setPhone(user.getPhone());
         return userDto;
     }
 
-    private User convertDtoUserToUserEntity(UserEntity user) {
-        User userDto = new User();
+    private static UserDto convertDtoUserToUserEntity(UserEntity user) {
+        UserDto userDto = new UserDto();
         userDto.setId(user.getIdUser());
         userDto.setFirstName(user.getFirstName());
         userDto.setLastName(user.getLastName());

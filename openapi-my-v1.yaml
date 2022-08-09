@@ -1,0 +1,776 @@
+openapi: 3.0.1
+info:
+  title: Функции API платформы перепродажи вещей по объявлениям
+  contact:
+    name: Людмила Рик
+    email: LRick@yandex.ru
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: Авторизация
+    description: Методы регистрации и аутентификации на сайте.
+  - name: Пользователи
+    description: Методы управления пользователями сайта.
+  - name: Объявления
+    description: Методы работы с объявлениями и комментариями к ним.
+paths:
+  /users:
+    post:
+      tags:
+        - Пользователи
+      summary: Добавление пользователя
+      description: Создаёт на сервере учётную запись нового пользователя.
+      operationId: addUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUser'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CreateUser'
+        '409':
+          description: Conflict
+        '501':
+          description: Not Implemented
+  /users/set_password:
+    post:
+      tags:
+        - Пользователи
+      summary: Новый пароль
+      description: Сохраняет новый пароль для зарегистрированного пользователя.
+      operationId: setPassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewPasswordDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/NewPasswordDto'
+        '409':
+          description: Conflict
+        '501':
+          description: Not Implemented
+  /upl:
+    post:
+      tags:
+        - Объявления
+      summary: Сохранить изображение
+      description: Сохраняет на сервере сайта картинку, полученную от клиента.
+      operationId: setImage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - file
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+        '409':
+          description: Conflict
+        '501':
+          description: Not Implemented
+  /register:
+    post:
+      tags:
+        - Авторизация
+      summary: Регистрация
+      description: Позволяет новому пользователю зарегистрироваться на сервере.
+      operationId: register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterReqDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+        '409':
+          description: Conflict
+        '501':
+          description: Not Implemented
+  /login:
+    post:
+      tags:
+        - Авторизация
+      summary: Аутентификация
+      description: >-
+        Позволяет пользователю аутентифицироваться в собственном кабинете на
+        сервере.
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginReqDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+        '409':
+          description: Conflict
+        '501':
+          description: Not Implemented
+  /ads:
+    get:
+      tags:
+        - Объявления
+      summary: Список объявлений
+      description: Получить список всех объявлений.
+      operationId: getAllAds
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ResponseWrapperAdsDto'
+        '409':
+          description: Conflict
+        '501':
+          description: Not Implemented
+    post:
+      tags:
+        - Объявления
+      summary: Новоё объявление
+      description: Добавляет новоё объявление.
+      operationId: addAds
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAdsDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AdsDto'
+        '409':
+          description: Conflict
+        '501':
+          description: Not Implemented
+  /ads/{ad_pk}/comment:
+    get:
+      tags:
+        - Объявления
+      summary: Список комментариев к объявлению
+      description: Получить список всех комментариев по заданному объявлению.
+      operationId: getAllComments
+      parameters:
+        - name: ad_pk
+          in: path
+          description: Ключ записи объявления
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ResponseWrapperCommentDto'
+        '409':
+          description: Conflict
+        '501':
+          description: Not Implemented
+    post:
+      tags:
+        - Объявления
+      summary: Новый комментарий
+      description: Добавляет новый комментарий к существующему объявлению.
+      operationId: addComment
+      parameters:
+        - name: ad_pk
+          in: path
+          description: Ключ записи объявления
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdsComment'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AdsComment'
+        '409':
+          description: Conflict
+        '501':
+          description: Not Implemented
+  /users/me:
+    get:
+      tags:
+        - Пользователи
+      summary: Список пользователей
+      description: >-
+        Запрашивает на сервере информацию о всех зарегистрированных
+        пользователях.
+      operationId: getUsers
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ResponseWrapperUserDto'
+        '409':
+          description: Conflict
+        '501':
+          description: Not Implemented
+    patch:
+      tags:
+        - Пользователи
+      summary: Изменение пользователя
+      description: Изменят данные учётной записи зарегистрированного пользователя.
+      operationId: updateUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/UserDto'
+        '409':
+          description: Conflict
+        '501':
+          description: Not Implemented
+  /ads/{ad_pk}:
+    get:
+      tags:
+        - Объявления
+      summary: Данные объявления
+      description: Получить все данные по заданному объявлению.
+      operationId: getAds
+      parameters:
+        - name: ad_pk
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/FullAdsDto'
+        '409':
+          description: Conflict
+        '501':
+          description: Not Implemented
+    delete:
+      tags:
+        - Объявления
+      summary: Удалить объявление
+      description: Удалить объявление по заданному идентификатору.
+      operationId: deleteAds
+      parameters:
+        - name: ad_pk
+          in: path
+          description: Ключ записи объявления
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+        '409':
+          description: Conflict
+        '501':
+          description: Not Implemented
+    patch:
+      tags:
+        - Объявления
+      summary: Изменить объявление
+      description: Изменить данные заданного объявления.
+      operationId: updateAds
+      parameters:
+        - name: ad_pk
+          in: path
+          description: Ключ записи объявления
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdsDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AdsDto'
+        '409':
+          description: Conflict
+        '501':
+          description: Not Implemented
+  /ads/{ad_pk}/comment/{id}:
+    get:
+      tags:
+        - Объявления
+      summary: Комментарий по объявлению
+      description: Получить данные комментария по заданному объявлению.
+      operationId: getComment
+      parameters:
+        - name: ad_pk
+          in: path
+          description: Ключ записи объявления
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: id
+          in: path
+          description: Идентификатор комментария
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AdsComment'
+        '409':
+          description: Conflict
+        '501':
+          description: Not Implemented
+    delete:
+      tags:
+        - Объявления
+      summary: Удаление комментария
+      description: Удаляет существующий комментарий к объявлению.
+      operationId: deleteComment
+      parameters:
+        - name: ad_pk
+          in: path
+          description: Ключ записи объявления
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: id
+          in: path
+          description: Идентификатор комментария
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+        '409':
+          description: Conflict
+        '501':
+          description: Not Implemented
+    patch:
+      tags:
+        - Объявления
+      summary: Изменить комментарий
+      description: Изменить содержимое комментария по заданному объявлению.
+      operationId: updateComment
+      parameters:
+        - name: ad_pk
+          in: path
+          description: Ключ записи объявления
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: id
+          in: path
+          description: Идентификатор комментария
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdsComment'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AdsComment'
+        '409':
+          description: Conflict
+        '501':
+          description: Not Implemented
+  /users/{id}:
+    get:
+      tags:
+        - Пользователи
+      summary: Данные пользователя
+      description: Запрашивает на сервере информацию о пользователе по его идентификатору.
+      operationId: getUser
+      parameters:
+        - name: id
+          in: path
+          description: Идентификатор пользоателя
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/UserDto'
+        '409':
+          description: Conflict
+        '501':
+          description: Not Implemented
+  /images/{id}/:
+    get:
+      tags:
+        - Объявления
+      summary: Получить изображение
+      description: Возвращает клиенту содержимое файла картинки по её ключу.
+      operationId: getImage
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            image/png:
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: byte
+        '409':
+          description: Conflict
+        '501':
+          description: Not Implemented
+  /images/{id}:
+    get:
+      tags:
+        - Объявления
+      summary: Получить изображение
+      description: Возвращает клиенту содержимое файла картинки по её ключу.
+      operationId: getImage_1
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            image/png:
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: byte
+        '409':
+          description: Conflict
+        '501':
+          description: Not Implemented
+  /ads/me:
+    get:
+      tags:
+        - Объявления
+      summary: Собственные объявления
+      description: Получить список всех собственных объявлений.
+      operationId: getAdsMe
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ResponseWrapperAdsDto'
+        '409':
+          description: Conflict
+        '501':
+          description: Not Implemented
+components:
+  schemas:
+    CreateUser:
+      type: object
+      properties:
+        email:
+          type: string
+          description: Адрес электронной почты (логин пользователя)
+        firstName:
+          type: string
+          description: Имя пользователя
+        lastName:
+          type: string
+          description: Фамилия пользователя
+        password:
+          type: string
+          description: Пароль доступа к кабинету пользователя
+        phone:
+          type: string
+          description: Контактный телефон пользователя
+      description: Данные нового пользователя
+    NewPasswordDto:
+      type: object
+      properties:
+        currentPassword:
+          type: string
+          description: Текущий пароль
+        newPassword:
+          type: string
+          description: Значение нового пароля
+      description: Данные для смены пароля
+    RegisterReqDto:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: string
+        role:
+          type: string
+          enum:
+            - USER
+            - GUEST
+            - ADMIN
+      description: Данные для регистрации
+    LoginReqDto:
+      type: object
+      properties:
+        password:
+          type: string
+        username:
+          type: string
+      description: Данные для авторизации
+    CreateAdsDto:
+      type: object
+      properties:
+        description:
+          type: string
+          description: Текст описания товара по объявлению
+        image:
+          type: string
+          description: Ссылка для скачивания содержимого картинки
+        pk:
+          type: integer
+          description: Первичный ключ записи объявления
+          format: int32
+        price:
+          type: integer
+          description: Объявленная цена за товар
+          format: int32
+        title:
+          type: string
+          description: Заголовок объявления
+      description: Данные нового объявления
+    AdsDto:
+      type: object
+      properties:
+        pk:
+          type: integer
+          description: Первичный ключ записи объявления
+          format: int32
+        author:
+          type: integer
+          description: Идентификатор автора объявления
+          format: int32
+        price:
+          type: integer
+          description: Объявленная цена за товар
+          format: int32
+        title:
+          type: string
+          description: Заголовок объявления
+        image:
+          type: string
+          description: Ссылка для скачивания содержимого картинки
+      description: Данные объявления
+    AdsComment:
+      type: object
+      properties:
+        pk:
+          type: integer
+          description: Первичный ключ записи объявления
+          format: int32
+        author:
+          type: integer
+          description: Идентификатор автора комментария
+          format: int32
+        createdAt:
+          type: string
+          description: Дата и время создания комментария
+          format: date-time
+        text:
+          type: string
+          description: Текст комментария
+      description: Данные комментария
+    UserDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Идентификатор пользователя (ключ)
+          format: int32
+        firstName:
+          type: string
+          description: Имя пользователя
+        lastName:
+          type: string
+          description: Фамилия пользователя
+        email:
+          type: string
+          description: Адрес электронной почты
+        phone:
+          type: string
+          description: Телефон пользователя
+      description: Изменённые данные пользователя
+    ResponseWrapperUserDto:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: Количество записей
+          format: int32
+        results:
+          type: array
+          description: Список данных пользователя
+          items:
+            $ref: '#/components/schemas/UserDto'
+      description: Оболочка ответа о данных пользователя
+    ResponseWrapperAdsDto:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: Количество записей
+          format: int32
+        results:
+          type: array
+          description: Список данных пользователя
+          items:
+            $ref: '#/components/schemas/AdsDto'
+      description: Оболочка ответа о данных объявления
+    FullAdsDto:
+      type: object
+      properties:
+        authorFirstName:
+          type: string
+          description: Имя автора объявления
+        authorLastName:
+          type: string
+          description: Фамилия автора объявления
+        description:
+          type: string
+          description: Текст описания товара по объявлению
+        email:
+          type: string
+          description: Адрес электронной почты автора объявления
+        image:
+          type: string
+          description: Ссылка для скачивания содержимого картинки
+        phone:
+          type: string
+          description: Контактный телефон автора объявления
+        pk:
+          type: integer
+          description: Первичный ключ записи объявления
+          format: int32
+        price:
+          type: integer
+          description: Объявленная цена за товар
+          format: int32
+        title:
+          type: string
+          description: Заголовок объявления
+      description: Полная информация об объявлении и его авторе
+    ResponseWrapperCommentDto:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: Количество записей
+          format: int32
+        results:
+          type: array
+          description: Список данных пользователя
+          items:
+            $ref: '#/components/schemas/AdsComment'
+      description: Оболочка ответа по комментариям к объявлению

@@ -2,14 +2,13 @@ package ru.skypro.homework.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import ru.skypro.homework.models.UserEntity;
 
 /**
  * Класс сущности, описывающей данные пользователя.
  */
 @Data
 @Schema(description = "Сущность пользователя")
-public class User {
+public class UserDto {
 
     @Schema(description = "Идентификатор пользователя (ключ)")
     private Integer id;

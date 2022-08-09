@@ -8,7 +8,7 @@ import lombok.Data;
  */
 @Data
 @Schema(description = "Данные для создания объявления")
-public class CreateAds {
+public class CreateAdsDto {
 
     @Schema(description = "Текст описания товара по объявлению")
     private String description;
