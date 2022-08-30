@@ -2,7 +2,6 @@ package ru.skypro.homework.controller;
 
 import java.io.IOException;
 import java.util.Enumeration;
-import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 

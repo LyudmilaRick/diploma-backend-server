@@ -44,7 +44,9 @@ import ru.skypro.homework.service.UserService;
 public class UserController {
 
     private final UserService userService;
-
+    /**
+     * В постановке отсутствует. Добавлен для самоконтроля и тестирования работы с ролями
+     */
     @GetMapping()
     @PreAuthorize("hasRole('ROLE_ADMIN')")
 //    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
@@ -56,7 +58,7 @@ public class UserController {
 
     @PostMapping()
     @Operation(tags = {"Пользователи"}, summary = "Добавление пользователя", description = "Создаёт на сервере учётную запись нового пользователя.")
-    public ResponseEntity<CreateUser> addUser(@Parameter(in = ParameterIn.DEFAULT, description = "Данные нового пользователя", required = true, schema = @Schema()) @Valid @RequestBody CreateUser body) {
+    protected ResponseEntity<CreateUser> addUser(@Parameter(in = ParameterIn.DEFAULT, description = "Данные нового пользователя", required = true, schema = @Schema()) @Valid @RequestBody CreateUser body) {
         log.info("Invoke: {}({})", "addUser", body);
         return new ResponseEntity<>(userService.addUser(body), HttpStatus.OK);
     }
@@ -88,7 +90,7 @@ public class UserController {
         log.info("Invoke: {}({})", "getUsers", auth.getName());
 
         //TODO: Как можно получить список собственных пользователей, если username, по логике, должен быть уникальным???
-        ArrayList<UserDto> list = new ArrayList<UserDto>();
+        ArrayList<UserDto> list = new ArrayList<>();
         list.add(userService.getUser(auth.getName()));
 
         ResponseWrapperUserDto result = new ResponseWrapperUserDto();

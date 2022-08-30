@@ -1,5 +1,6 @@
 package ru.skypro.homework.service;
 
+import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.AdsDto;
 import ru.skypro.homework.dto.AdsComment;
 import ru.skypro.homework.dto.CreateAdsDto;
@@ -120,4 +121,11 @@ public interface AdsService {
      */
     byte[] getImage(String imgKey);
 
+    /**
+     * Возвращает идентификатор сохраненной картинки по её ключу.
+     * как итог операции сохранения этой картинки в БД
+     * @param file изображение
+     * @return идентиификатор
+     */
+    String upLoadAdsImg(MultipartFile file);
 }

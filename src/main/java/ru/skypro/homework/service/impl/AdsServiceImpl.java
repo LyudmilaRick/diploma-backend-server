@@ -1,5 +1,6 @@
 package ru.skypro.homework.service.impl;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -10,7 +11,9 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
+import ru.skypro.homework.exceptions.WebBadRequestException;
 import ru.skypro.homework.exceptions.WebNotFoundException;
 import ru.skypro.homework.models.AdsEntity;
 import ru.skypro.homework.models.ComEntity;
@@ -87,12 +90,12 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public AdsDto updateAds(String username, Integer adsKey, AdsDto body) {
-        UserEntity author = users.getByUsername(username);
-
-        advertisement.findById(adsKey)
-                .orElseThrow(() -> new WebNotFoundException("Ads '" + adsKey + "' not found."));
-
-        AdsEntity entity = new AdsEntity(adsKey, author, null, body.getPrice().doubleValue(), body.getTitle(), null);
+        OffsetDateTime created = LocalDateTime.now().atOffset(ZoneOffset.UTC);
+        AdsEntity entity       = advertisement.findById(adsKey)
+                                              .orElseThrow(WebNotFoundException:: new);
+        entity.setTitle(body.getTitle());
+        entity.setPrice(body.getPrice().doubleValue());
+        entity.setCreated(created);
         AdsEntity result = advertisement.saveAndFlush(entity);
 
         // связывание сущностей картинки и объявления по ключам, если uuid картинки передан в запросе и она существет в БД
@@ -132,14 +135,13 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public AdsComment addComment(String username, Integer adsKey, AdsComment body) {
-        AdsEntity ads = advertisement.getReferenceById(adsKey);
+        AdsEntity ads = advertisement.findById(adsKey).orElseThrow(WebNotFoundException::new);
         UserEntity author = users.getByUsername(username);
-        OffsetDateTime created = body.getCreatedAt() != null ? body.getCreatedAt() : LocalDateTime.now().atOffset(ZoneOffset.UTC);
-
-        ComEntity entity = new ComEntity(null, ads, author, OffsetDateTime.MAX, body.getText());
-        entity = comments.save(entity);
-
-        return convertComEntityToDtoAdsComments(entity);
+        //OffsetDateTime created = body.getCreatedAt() != null ? body.getCreatedAt() : LocalDateTime.now().atOffset(ZoneOffset.UTC);
+        OffsetDateTime created = LocalDateTime.now().atOffset(ZoneOffset.UTC);
+        ComEntity entity = new ComEntity(null, ads, author, created, body.getText());
+        var result = comments.save(entity);
+        return convertComEntityToDtoAdsComments(result);
     }
 
     @Override
@@ -190,6 +192,18 @@ public class AdsServiceImpl implements AdsService {
         }
 
         return null;
+    }
+
+    @Override
+    public String upLoadAdsImg(MultipartFile file) {
+        if (file == null) {
+            throw new WebBadRequestException("Image file content is empty.");
+        }
+        try {
+            return setImage(file.getName(), file.getSize(), file.getBytes());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private String LinkImageToAdsByKey(String uuid, AdsEntity result) throws WebNotFoundException {

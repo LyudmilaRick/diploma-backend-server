@@ -1,6 +1,5 @@
 package ru.skypro.homework.controller;
 
-import java.io.IOException;
 import javax.validation.Valid;
 
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +33,6 @@ import ru.skypro.homework.dto.CreateAdsDto;
 import ru.skypro.homework.dto.FullAdsDto;
 import ru.skypro.homework.dto.ResponseWrapperAdsDto;
 import ru.skypro.homework.dto.ResponseWrapperCommentDto;
-import ru.skypro.homework.exceptions.WebBadRequestException;
 import ru.skypro.homework.service.AdsService;
 
 /**
@@ -93,7 +91,7 @@ public class AdsController {
         return new ResponseEntity<Void>(HttpStatus.OK);
     }
 
-    @GetMapping("/ads/{ad_pk}/comment")
+    @GetMapping("/ads/{ad_pk}/comments")
     @Operation(tags = {"Объявления"}, summary = "Список комментариев к объявлению", description = "Получить список всех комментариев по заданному объявлению.")
     public ResponseEntity<ResponseWrapperCommentDto> getAllComments(@Parameter(in = ParameterIn.PATH, description = "Ключ записи объявления", required = true, schema = @Schema()) @PathVariable("ad_pk") Integer adsKey) {
         log.info("Invoke: {}({})", "getAllComments", adsKey);
@@ -129,20 +127,12 @@ public class AdsController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PostMapping("/upl")
+    @PostMapping(value = "/upl", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(tags = {"Объявления"}, summary = "Сохранить изображение", description = "Сохраняет на сервере сайта картинку, полученную от клиента.")
     public String setImage(@RequestParam MultipartFile file) {
         log.info("Invoke: {}({})", "setImage", file != null ? file.getSize() : 0);
+        return adsService.upLoadAdsImg(file);
 
-        if (file == null) {
-            throw new WebBadRequestException("Image file content is empty.");
-        }
-
-        try {
-            return adsService.setImage(file.getName(), file.getSize(), file.getBytes());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @GetMapping(value = {"/images/{id}", "/images/{id}/"}, produces = {MediaType.IMAGE_PNG_VALUE})
