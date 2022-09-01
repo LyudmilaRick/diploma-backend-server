@@ -111,22 +111,12 @@ Links:
   http://localhost:8080
   http://localhost:8080/swagger-ui.html
 
-Default user:
-  user@gmail.com
-  password
-  USER
-
-Журнал:
-  C:\Users\rav16\ads-reselling-platform\app.log
-
 База данных:
 ----------------------------------------------------------------------
 
 ricksoft_ads_reselling
 - A database of platform for reselling things by ads
 
-logint  : ads_owner
-password: 1ZSEywJo
 
 Tables:
   user_data
