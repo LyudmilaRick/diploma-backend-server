@@ -35,6 +35,8 @@ import ru.skypro.homework.dto.ResponseWrapperAdsDto;
 import ru.skypro.homework.dto.ResponseWrapperCommentDto;
 import ru.skypro.homework.service.AdsService;
 
+import static ru.skypro.homework.models.Constants.*;
+
 /**
  * Контроллер обработки запросов по объявлениям и комментариям, размещенным на сайте.
  */
@@ -58,57 +60,57 @@ public class AdsController {
     @GetMapping(value = "/ads/me")
     @Operation(tags = {"Объявления"}, summary = "Собственные объявления", description = "Получить список всех собственных объявлений.")
     public ResponseEntity<ResponseWrapperAdsDto> getAdsMe(Authentication auth) {
-        log.info("Invoke: {}({})", "getAdsMe", auth.getName());
+        log.info(INVOKE_STR_1, "getAdsMe", auth.getName());
         return new ResponseEntity<>(adsService.getMeAds(auth.getName()), HttpStatus.OK);
     }
 
     @GetMapping("/ads/{ad_pk}")
     @Operation(tags = {"Объявления"}, summary = "Данные объявления", description = "Получить все данные по заданному объявлению.")
     public ResponseEntity<FullAdsDto> getAds(@PathVariable("ad_pk") Integer adsKey) {
-        log.info("Invoke: {}({})", "getAds", adsKey);
+        log.info(INVOKE_STR_1, "getAds", adsKey);
         return new ResponseEntity<>(adsService.getAds(adsKey), HttpStatus.OK);
     }
 
     @PostMapping("/ads")
     @Operation(tags = {"Объявления"}, summary = "Новоё объявление", description = "Добавляет новоё объявление.")
     public ResponseEntity<AdsDto> addAds(Authentication auth, @Parameter(in = ParameterIn.DEFAULT, description = "Данные нового объявления", required = true, schema = @Schema()) @Valid @RequestBody CreateAdsDto body) {
-        log.info("Invoke: {}({})", "addAds", body);
+        log.info(INVOKE_STR_1, "addAds", body);
         return new ResponseEntity<>(adsService.addAds(auth.getName(), body), HttpStatus.OK);
     }
 
     @PatchMapping("/ads/{ad_pk}")
     @Operation(tags = {"Объявления"}, summary = "Изменить объявление", description = "Изменить данные заданного объявления.")
     public ResponseEntity<AdsDto> updateAds(Authentication auth, @Parameter(in = ParameterIn.PATH, description = "Ключ записи объявления", required = true, schema = @Schema()) @PathVariable("ad_pk") Integer adsKey, @Parameter(in = ParameterIn.DEFAULT, description = "Данные объявления", required = true, schema = @Schema()) @Valid @RequestBody AdsDto body) {
-        log.info("Invoke: {}({}, {})", "updateAds", adsKey, body);
+        log.info(INVOKE_STR_2, "updateAds", adsKey, body);
         return new ResponseEntity<>(adsService.updateAds(auth.getName(), adsKey, body), HttpStatus.OK);
     }
 
     @DeleteMapping("/ads/{ad_pk}")
     @Operation(tags = {"Объявления"}, summary = "Удалить объявление", description = "Удалить объявление по заданному идентификатору.")
-    public ResponseEntity<?> deleteAds(@Parameter(in = ParameterIn.PATH, description = "Ключ записи объявления", required = true, schema = @Schema()) @PathVariable("ad_pk") Integer adsKey) {
-        log.info("Invoke: {}({})", "deleteAds", adsKey);
+    public ResponseEntity<Void> deleteAds(@Parameter(in = ParameterIn.PATH, description = "Ключ записи объявления", required = true, schema = @Schema()) @PathVariable("ad_pk") Integer adsKey) {
+        log.info(INVOKE_STR_1, "deleteAds", adsKey);
         adsService.deleteAds(adsKey);
-        return new ResponseEntity<Void>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping("/ads/{ad_pk}/comments")
     @Operation(tags = {"Объявления"}, summary = "Список комментариев к объявлению", description = "Получить список всех комментариев по заданному объявлению.")
     public ResponseEntity<ResponseWrapperCommentDto> getAllComments(@Parameter(in = ParameterIn.PATH, description = "Ключ записи объявления", required = true, schema = @Schema()) @PathVariable("ad_pk") Integer adsKey) {
-        log.info("Invoke: {}({})", "getAllComments", adsKey);
+        log.info(INVOKE_STR_1, "getAllComments", adsKey);
         return new ResponseEntity<>(adsService.getAllComments(adsKey), HttpStatus.OK);
     }
 
     @GetMapping("/ads/{ad_pk}/comment/{id}")
     @Operation(tags = {"Объявления"}, summary = "Комментарий по объявлению", description = "Получить данные комментария по заданному объявлению.")
     public ResponseEntity<AdsComment> getComment(@Parameter(in = ParameterIn.PATH, description = "Ключ записи объявления", required = true, schema = @Schema()) @PathVariable("ad_pk") Integer adsKey, @Parameter(in = ParameterIn.PATH, description = "Идентификатор комментария", required = true, schema = @Schema()) @PathVariable("id") Integer comKey) {
-        log.info("Invoke: {}({}, {})", "getComment", adsKey, comKey);
+        log.info(INVOKE_STR_2, "getComment", adsKey, comKey);
         return new ResponseEntity<>(adsService.getComment(adsKey, comKey), HttpStatus.OK);
     }
 
     @PostMapping("/ads/{ad_pk}/comment")
     @Operation(tags = {"Объявления"}, summary = "Новый комментарий", description = "Добавляет новый комментарий к существующему объявлению.")
     public ResponseEntity<AdsComment> addComment(Authentication auth, @Parameter(in = ParameterIn.PATH, description = "Ключ записи объявления", required = true, schema = @Schema()) @PathVariable("ad_pk") Integer adsKey, @Parameter(in = ParameterIn.DEFAULT, description = "Данные комментария", required = true, schema = @Schema()) @Valid @RequestBody AdsComment body) {
-        log.info("Invoke: {}({}, {})", "addComment", adsKey, body);
+        log.info(INVOKE_STR_2, "addComment", adsKey, body);
         return new ResponseEntity<>(adsService.addComment(auth.getName(), adsKey, body), HttpStatus.OK);
     }
 
@@ -122,7 +124,7 @@ public class AdsController {
     @Operation(tags = {"Объявления"}, summary = "Удаление комментария", description = "Удаляет существующий комментарий к объявлению.")
     @DeleteMapping("/ads/{ad_pk}/comment/{id}")
     public ResponseEntity<Void> deleteComment(@Parameter(in = ParameterIn.PATH, description = "Ключ записи объявления", required = true, schema = @Schema()) @PathVariable("ad_pk") Integer adsKey, @Parameter(in = ParameterIn.PATH, description = "Идентификатор комментария", required = true, schema = @Schema()) @PathVariable("id") Integer comKey) {
-        log.info("Invoke: {}({}, {})", "deleteComment", adsKey, comKey);
+        log.info(INVOKE_STR_2, "deleteComment", adsKey, comKey);
         adsService.deleteComment(adsKey, comKey);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -130,7 +132,7 @@ public class AdsController {
     @PostMapping(value = "/upl", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(tags = {"Объявления"}, summary = "Сохранить изображение", description = "Сохраняет на сервере сайта картинку, полученную от клиента.")
     public String setImage(@RequestParam MultipartFile file) {
-        log.info("Invoke: {}({})", "setImage", file != null ? file.getSize() : 0);
+        log.info(INVOKE_STR_1, "setImage", file != null ? file.getSize() : 0);
         return adsService.upLoadAdsImg(file);
 
     }
@@ -138,7 +140,7 @@ public class AdsController {
     @GetMapping(value = {"/images/{id}", "/images/{id}/"}, produces = {MediaType.IMAGE_PNG_VALUE})
     @Operation(tags = {"Объявления"}, summary = "Получить изображение", description = "Возвращает клиенту содержимое файла картинки по её ключу.")
     public byte[] getImage(@PathVariable("id") String imgKey) {
-        log.info("Invoke: {}({})", "getImage", imgKey);
+        log.info(INVOKE_STR_1, "getImage", imgKey);
         return adsService.getImage(imgKey);
     }
 

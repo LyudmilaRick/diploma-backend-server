@@ -7,7 +7,6 @@ import ru.skypro.homework.dto.ResponseWrapperUserDto;
 
 public interface UserService {
 
-    @Deprecated
     CreateUser addUser(CreateUser user);
 
     ResponseWrapperUserDto getUsers();

@@ -12,6 +12,6 @@ import ru.skypro.homework.models.UserEntity;
 public interface UserRepository extends JpaRepository<UserEntity, Integer> {
     
     @Query(value = "SELECT * FROM user_data WHERE username = ?1", nativeQuery = true)
-    public UserEntity getByUsername(String username);
+    UserEntity getByUsername(String username);
 
 }

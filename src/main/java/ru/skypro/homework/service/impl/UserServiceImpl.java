@@ -27,7 +27,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Deprecated
     public CreateUser addUser(CreateUser user) {
         UserEntity entity = new UserEntity(null, user.getEmail(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getPhone());
         UserEntity result = users.saveAndFlush(entity);
@@ -84,20 +83,9 @@ public class UserServiceImpl implements UserService {
 
         //TODO: Надо продумать как изменить пароль в БД. Смотрим AuthServiceImpl.register() - manager.updateUser(user);
         throw new UnsupportedOperationException("TODO: UserServiceImpl.setPassword()");
-
-//        if (entity.getPassword().equals(oldPassword)) {
-//            entity.setPassword(newPassword);
-//            users.saveAndFlush(entity);
-//            NewPasswordDto result = new NewPasswordDto();
-//            result.setNewPassword(newPassword);
-//            result.setCurrentPassword(oldPassword);
-//            return result;
-//        }
-//
-//        throw new WebBadRequestException("Incorrect current password");
     }
 
-    @Deprecated
+
     private static CreateUser convertDtoCreateUserToUserEntity(UserEntity user) {
         CreateUser userDto = new CreateUser();
         userDto.setEmail(user.getEmail());

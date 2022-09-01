@@ -25,17 +25,19 @@ import ru.skypro.homework.repository.ComRepository;
 import ru.skypro.homework.repository.ImgRepository;
 import ru.skypro.homework.repository.UserRepository;
 
+import static ru.skypro.homework.models.Constants.*;
+
 @Service
 public class AdsServiceImpl implements AdsService {
 
     private final UserRepository users;
-    private final ImgRepository images;
+    private final ImgRepository imgRepository;
     private final ComRepository comments;
     private final AdsRepository advertisement;
 
-    public AdsServiceImpl(UserRepository users, ImgRepository images, ComRepository comments, AdsRepository advertisement) {
+    public AdsServiceImpl(UserRepository users, ImgRepository imgRepository, ComRepository comments, AdsRepository advertisement) {
         this.users = users;
-        this.images = images;
+        this.imgRepository = imgRepository;
         this.comments = comments;
         this.advertisement = advertisement;
     }
@@ -62,28 +64,28 @@ public class AdsServiceImpl implements AdsService {
         Optional<AdsEntity> result = advertisement.findById(adsKey);
         if (result.isPresent()) {
             FullAdsDto full = convertAdsEntityToDtoFullAds(result.get());
-            //ImgEntity image = images.findAllByAdsId(adsKey);
-            List<ImgEntity> list = images.findAllByAdsId(adsKey);
+            List<ImgEntity> list = imgRepository.findAllByAdsId(adsKey);
             if (!list.isEmpty()) {
                 full.setImage(list.get(0).getId());
             }
             return full;
         }
-        throw new WebNotFoundException("Ads '" + adsKey + "' not found.");
+        throw new WebNotFoundException("Ads '" + adsKey + INVOKE_STR_FOUND);
     }
 
     @Override
     public AdsDto addAds(String username, CreateAdsDto body) {
-        UserEntity author = users.getByUsername(username);
-        OffsetDateTime created = LocalDateTime.now().atOffset(ZoneOffset.UTC);
-        Double price = body.getPrice().doubleValue();
-
-        AdsEntity entity = new AdsEntity(null, author, created, price, body.getTitle(), body.getDescription());
+        AdsEntity entity = new AdsEntity(null,
+                users.getByUsername(username),
+                LocalDateTime.now().atOffset(ZoneOffset.UTC),
+                body.getPrice().doubleValue(),
+                body.getTitle(),
+                body.getDescription());
         AdsEntity result = advertisement.saveAndFlush(entity);
 
         // связывание сущностей картинки и объявления по ключам, если uuid картинки передан в запросе и она существет в БД
         // если uuid картинки передан в запросе, а в БД её нет, то возвращается ошибка
-        String uuidImage = LinkImageToAdsByKey(body.getImage(), result);
+        String uuidImage = linkImageToAdsByKey(body.getImage(), result);
 
         return convertAdsEntityToAdsDto(result, uuidImage);
     }
@@ -91,8 +93,8 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public AdsDto updateAds(String username, Integer adsKey, AdsDto body) {
         OffsetDateTime created = LocalDateTime.now().atOffset(ZoneOffset.UTC);
-        AdsEntity entity       = advertisement.findById(adsKey)
-                                              .orElseThrow(WebNotFoundException:: new);
+        AdsEntity entity = advertisement.findById(adsKey)
+                .orElseThrow(WebNotFoundException::new);
         entity.setTitle(body.getTitle());
         entity.setPrice(body.getPrice().doubleValue());
         entity.setCreated(created);
@@ -100,19 +102,18 @@ public class AdsServiceImpl implements AdsService {
 
         // связывание сущностей картинки и объявления по ключам, если uuid картинки передан в запросе и она существет в БД
         // если uuid картинки передан в запросе, а в БД её нет, то возвращается ошибка
-        String uuidImage = LinkImageToAdsByKey(body.getImage(), result);
+        String uuidImage = linkImageToAdsByKey(body.getImage(), result);
 
         return convertAdsEntityToAdsDto(result, uuidImage);
     }
 
     @Override
     public void deleteAds(Integer adsKey) {
-        advertisement.findById(adsKey)
-                .orElseThrow(() -> new WebNotFoundException("Ads '" + adsKey + "' not found."));
+        advertisement.findById(adsKey).orElseThrow(() -> new WebNotFoundException("Ads '" + adsKey + INVOKE_STR_FOUND));
 
         advertisement.deleteById(adsKey);
         comments.deleteByAdsId(adsKey);
-        images.deleteByAdsId(adsKey);
+        imgRepository.deleteByAdsId(adsKey);
     }
 
     @Override
@@ -137,7 +138,7 @@ public class AdsServiceImpl implements AdsService {
     public AdsComment addComment(String username, Integer adsKey, AdsComment body) {
         AdsEntity ads = advertisement.findById(adsKey).orElseThrow(WebNotFoundException::new);
         UserEntity author = users.getByUsername(username);
-        //OffsetDateTime created = body.getCreatedAt() != null ? body.getCreatedAt() : LocalDateTime.now().atOffset(ZoneOffset.UTC);
+
         OffsetDateTime created = LocalDateTime.now().atOffset(ZoneOffset.UTC);
         ComEntity entity = new ComEntity(null, ads, author, created, body.getText());
         var result = comments.save(entity);
@@ -165,7 +166,7 @@ public class AdsServiceImpl implements AdsService {
     public void deleteComment(Integer adsKey, Integer comKey) {
         ComEntity entity = comments.getByKeys(adsKey, comKey);
         if (entity == null) {
-            throw new WebNotFoundException("Comment '" + adsKey + "' for Ads '" + comKey + "' not found.");
+            throw new WebNotFoundException("Comment '" + adsKey + "' for Ads '" + comKey + INVOKE_STR_FOUND);
         }
 
         comments.delete(entity);
@@ -180,18 +181,18 @@ public class AdsServiceImpl implements AdsService {
         entity.setContent(bytes);
         entity.setId(UUID.randomUUID().toString());
 
-        ImgEntity result = images.saveAndFlush(entity);
+        ImgEntity result = imgRepository.saveAndFlush(entity);
         return result.getId();
     }
 
     @Override
     public byte[] getImage(String imgKey) {
-        ImgEntity image = images.getByKey(imgKey);
+        ImgEntity image = imgRepository.getByKey(imgKey);
         if (image != null) {
             return image.getContent();
         }
 
-        return null;
+        return new byte[0];
     }
 
     @Override
@@ -202,21 +203,19 @@ public class AdsServiceImpl implements AdsService {
         try {
             return setImage(file.getName(), file.getSize(), file.getBytes());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new WebBadRequestException(e.getMessage());
         }
     }
 
-    private String LinkImageToAdsByKey(String uuid, AdsEntity result) throws WebNotFoundException {
-        if (result != null) {
-            if (uuid != null && uuid.length() > 0) {
-                ImgEntity imgEntity = images.getByKey(uuid);
-                if (imgEntity == null) {
-                    throw new WebNotFoundException("Image '" + uuid + "' not found for Ads '" + result.getTitle() + "'.");
-                }
-                imgEntity.setAds(result);
-                images.save(imgEntity);
-                return uuid;
+    private String linkImageToAdsByKey(String uuid, AdsEntity result) throws WebNotFoundException {
+        if (result != null && uuid != null && uuid.length() > 0) {
+            ImgEntity imgEntity = imgRepository.getByKey(uuid);
+            if (imgEntity == null) {
+                throw new WebNotFoundException("Image '" + uuid + "' not found for Ads '" + result.getTitle() + "'.");
             }
+            imgEntity.setAds(result);
+            imgRepository.save(imgEntity);
+            return uuid;
         }
         return null;
     }
@@ -240,7 +239,7 @@ public class AdsServiceImpl implements AdsService {
         adsDto.setPrice(entity.getPrice().intValue());
         adsDto.setTitle(entity.getTitle());
 
-        List<ImgEntity> list = images.findAllByAdsId(entity.getIdAds());
+        List<ImgEntity> list = imgRepository.findAllByAdsId(entity.getIdAds());
         if (!list.isEmpty()) {
             adsDto.setImage(list.get(0).getId());
         }

@@ -31,6 +31,8 @@ import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.ResponseWrapperUserDto;
 import ru.skypro.homework.service.UserService;
 
+import static ru.skypro.homework.models.Constants.*;
+
 /**
  * Контроллер обработки запросов по пользователям сайта.
  */
@@ -49,7 +51,7 @@ public class UserController {
      */
     @GetMapping()
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+
     @Operation(tags = {"Пользователи"}, summary = "Список пользователей", description = "Запрашивает на сервере список всех зарегистрированных пользователей.")
     public ResponseEntity<ResponseWrapperUserDto> getUsers() {
         log.info("Invoke: {}()", "getUsers");
@@ -59,14 +61,14 @@ public class UserController {
     @PostMapping()
     @Operation(tags = {"Пользователи"}, summary = "Добавление пользователя", description = "Создаёт на сервере учётную запись нового пользователя.")
     protected ResponseEntity<CreateUser> addUser(@Parameter(in = ParameterIn.DEFAULT, description = "Данные нового пользователя", required = true, schema = @Schema()) @Valid @RequestBody CreateUser body) {
-        log.info("Invoke: {}({})", "addUser", body);
+        log.info(INVOKE_STR_1 , "addUser", body);
         return new ResponseEntity<>(userService.addUser(body), HttpStatus.OK);
     }
 
     @GetMapping("{id}")
     @Operation(tags = {"Пользователи"}, summary = "Данные пользователя", description = "Запрашивает на сервере информацию о пользователе по его идентификатору.")
     public ResponseEntity<UserDto> getUser(@Parameter(in = ParameterIn.PATH, description = "Идентификатор пользоателя", required = true, schema = @Schema()) @PathVariable("id") Integer usrKey) {
-        log.info("Invoke: {}({})", "getUser", usrKey);
+        log.info(INVOKE_STR_1, "getUser", usrKey);
 
         return new ResponseEntity<>(userService.getUser(usrKey), HttpStatus.OK);
 
@@ -87,7 +89,7 @@ public class UserController {
     @GetMapping("/me")
     @Operation(tags = {"Пользователи"}, summary = "Список пользователей", description = "Запрашивает на сервере информацию о всех зарегистрированных пользователях.")
     public ResponseEntity<ResponseWrapperUserDto> getUsers(Authentication auth) {
-        log.info("Invoke: {}({})", "getUsers", auth.getName());
+        log.info(INVOKE_STR_1, "getUsers", auth.getName());
 
         //TODO: Как можно получить список собственных пользователей, если username, по логике, должен быть уникальным???
         ArrayList<UserDto> list = new ArrayList<>();
@@ -102,7 +104,7 @@ public class UserController {
     @PatchMapping("/me")
     @Operation(tags = {"Пользователи"}, summary = "Изменение пользователя", description = "Изменят данные учётной записи зарегистрированного пользователя.")
     public ResponseEntity<UserDto> updateUser(Authentication auth, @Parameter(in = ParameterIn.DEFAULT, description = "Изменённые данные пользователя", required = true, schema = @Schema()) @Valid @RequestBody UserDto body) {
-        log.info("Invoke: {}({})", "updateUser", auth.getName());
+        log.info(INVOKE_STR_1, "updateUser", auth.getName());
         return new ResponseEntity<>(userService.updateUser(auth.getName(), body), HttpStatus.OK);
     }
 

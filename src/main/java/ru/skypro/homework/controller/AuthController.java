@@ -24,6 +24,7 @@ import ru.skypro.homework.dto.Role;
 import ru.skypro.homework.service.AuthService;
 
 import static ru.skypro.homework.dto.Role.USER;
+import static ru.skypro.homework.models.Constants.*;
 
 /**
  * Контроллер обработки запросов аутентификации и регистрации новых пользователей.
@@ -49,8 +50,8 @@ public class AuthController {
      */
     @PostMapping("/login")
     @Operation(tags = {"Авторизация"}, summary = "Аутентификация", description = "Позволяет пользователю аутентифицироваться в собственном кабинете на сервере.")
-    public ResponseEntity<?> login(@Parameter(in = ParameterIn.DEFAULT, description = "Данные для авторизации", required = true, schema = @Schema()) @Valid @RequestBody LoginReqDto body) {
-        log.info("Invoke: {}({})", "login", body.getUsername());
+    public ResponseEntity<String> login(@Parameter(in = ParameterIn.DEFAULT, description = "Данные для авторизации", required = true, schema = @Schema()) @Valid @RequestBody LoginReqDto body) {
+        log.info(INVOKE_STR_1, "login", body.getUsername());
 
         if (authService.login(body.getUsername(), body.getPassword())) {
             return ResponseEntity.ok().build();
@@ -70,9 +71,8 @@ public class AuthController {
      */
     @PostMapping("/register")
     @Operation(tags = {"Авторизация"}, summary = "Регистрация", description = "Позволяет новому пользователю зарегистрироваться на сервере.")
-    public ResponseEntity<?> register(@Parameter(in = ParameterIn.DEFAULT, description = "Данные для регистрации", required = true, schema = @Schema()) @Valid @RequestBody RegisterReqDto body) {
-        log.info("Invoke: {}({})", "register", body.getUsername());
-
+    public ResponseEntity<String> register(@Parameter(in = ParameterIn.DEFAULT, description = "Данные для регистрации", required = true, schema = @Schema()) @Valid @RequestBody RegisterReqDto body) {
+        log.info(INVOKE_STR_1 , "register", body.getUsername());
         Role role = body.getRole() == null ? USER : body.getRole();
         if (authService.register(body, role)) {
             return ResponseEntity.ok().build();

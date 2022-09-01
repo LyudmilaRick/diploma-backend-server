@@ -19,6 +19,6 @@ public interface AdsRepository extends JpaRepository<AdsEntity, Integer> {
      * @return список сущностей объявлений.
      */
     @Query(value = "SELECT * FROM ads_header WHERE id_user = ?1", nativeQuery = true)
-    public List<AdsEntity> findByAuthorId(Integer id);
+    List<AdsEntity> findByAuthorId(Integer id);
 
 }

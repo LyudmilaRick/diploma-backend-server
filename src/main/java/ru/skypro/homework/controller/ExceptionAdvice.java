@@ -23,26 +23,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @Slf4j
 @ControllerAdvice
 public class ExceptionAdvice {
-
-    /*
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "Illegal Argument Exception")
-    @ExceptionHandler(IllegalArgumentException.class)
-    public void handleException(HttpServletRequest req, IllegalArgumentException e) {
-        log.error(getMessageTitle(req, e));
-    }
-
-    @ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Not Found Exception")
-    @ExceptionHandler(NullPointerException.class)
-    public void handleException(HttpServletRequest req, NullPointerException e) {
-        log.error(getMessageTitle(req, e));
-    }
-
-    @ResponseStatus(value = HttpStatus.CONFLICT, reason = "Conflict Exception")
-    @ExceptionHandler(TypeNotPresentException.class)
-    public void handleException(HttpServletRequest req, TypeNotPresentException e) {
-        log.error(getMessageTitle(req, e));
-    }
-     */
     /**
      * Глобальный обработчик исключений, возникающих в контроллерах приложения.
      *
@@ -78,7 +58,7 @@ public class ExceptionAdvice {
      * @param e объект перехваченного исключения.
      */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity handleException(HttpServletRequest req, Exception e) {
+    public ResponseEntity<String> handleException(HttpServletRequest req, Exception e) {
         log.error(getMessageTitle(req), e);
         return ResponseEntity.internalServerError().body(e.getMessage());
     }
