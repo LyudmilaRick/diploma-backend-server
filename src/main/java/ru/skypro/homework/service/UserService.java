@@ -17,5 +17,5 @@ public interface UserService {
 
     UserDto updateUser(String username, UserDto user);
 
-    NewPasswordDto setPassword(String userName, String oldPassword, String newPassword);
+    NewPasswordDto newPassword(String oldPassword, String newPassword);
 }

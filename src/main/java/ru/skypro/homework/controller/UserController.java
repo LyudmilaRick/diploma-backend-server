@@ -5,9 +5,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+
 import java.util.ArrayList;
 
 import javax.validation.Valid;
+
 import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 
@@ -29,6 +31,7 @@ import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.dto.CreateUser;
 import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.ResponseWrapperUserDto;
+import ru.skypro.homework.service.AuthService;
 import ru.skypro.homework.service.UserService;
 
 import static ru.skypro.homework.models.Constants.*;
@@ -46,6 +49,8 @@ import static ru.skypro.homework.models.Constants.*;
 public class UserController {
 
     private final UserService userService;
+    private final AuthService authService;
+
     /**
      * В постановке отсутствует. Добавлен для самоконтроля и тестирования работы с ролями
      */
@@ -61,7 +66,7 @@ public class UserController {
     @PostMapping()
     @Operation(tags = {"Пользователи"}, summary = "Добавление пользователя", description = "Создаёт на сервере учётную запись нового пользователя.")
     protected ResponseEntity<CreateUser> addUser(@Parameter(in = ParameterIn.DEFAULT, description = "Данные нового пользователя", required = true, schema = @Schema()) @Valid @RequestBody CreateUser body) {
-        log.info(INVOKE_STR_1 , "addUser", body);
+        log.info(INVOKE_STR_1, "addUser", body);
         return new ResponseEntity<>(userService.addUser(body), HttpStatus.OK);
     }
 
@@ -113,8 +118,13 @@ public class UserController {
     public ResponseEntity<NewPasswordDto> setPassword(Authentication auth, @Parameter(in = ParameterIn.DEFAULT, description = "Данные для смены пароля", required = true, schema = @Schema()) @Valid @RequestBody NewPasswordDto body) {
         log.info("Invoke: {}({})", "setPassword", auth.getName());
 
-        NewPasswordDto resultPassword = userService.setPassword(auth.getName(), body.getCurrentPassword(), body.getNewPassword());
-        return new ResponseEntity<>(resultPassword, HttpStatus.OK);
+        if (authService.setPassword(auth.getName(), body.getCurrentPassword(), body.getNewPassword())) {
+            return new ResponseEntity<>(userService.newPassword(body.getCurrentPassword(), body.getNewPassword()),
+                    HttpStatus.OK);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
     }
 
 }

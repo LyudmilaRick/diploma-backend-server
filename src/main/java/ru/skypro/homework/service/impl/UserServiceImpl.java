@@ -78,20 +78,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public NewPasswordDto setPassword(String userName, String oldPassword, String newPassword) {
-        UserEntity entity = users.getByUsername(userName);
-
-        //TODO: Надо продумать как изменить пароль в БД. Смотрим AuthServiceImpl.register() - manager.updateUser(user);
-        throw new UnsupportedOperationException("TODO: UserServiceImpl.setPassword()");
+    public NewPasswordDto newPassword(String oldPassword, String newPassword) {
+            NewPasswordDto result = new NewPasswordDto();
+            result.setNewPassword(newPassword);
+            result.setCurrentPassword(oldPassword);
+            return result;
     }
-
 
     private static CreateUser convertDtoCreateUserToUserEntity(UserEntity user) {
         CreateUser userDto = new CreateUser();
         userDto.setEmail(user.getEmail());
         userDto.setFirstName(user.getFirstName());
         userDto.setLastName(user.getLastName());
-//      userDto.setPassword(user.getPassword());
         userDto.setPhone(user.getPhone());
         return userDto;
     }
