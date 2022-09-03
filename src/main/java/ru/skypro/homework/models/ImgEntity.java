@@ -3,6 +3,7 @@ package ru.skypro.homework.models;
 import java.io.Serializable;
 import java.util.Objects;
 import javax.persistence.*;
+import org.hibernate.annotations.Type;
 
 /**
  * Класс сущности пользователя сайта.
@@ -38,15 +39,17 @@ public class ImgEntity implements Serializable {
     /**
      * Содержимое картинки (файл изображения).
      */
-    @Lob
-    private byte[] context;
+//    @Lob
+//    @Column(name = "content", columnDefinition = "BLOB")
+    @Type(type = "org.hibernate.type.BinaryType")
+    private byte[] content;
 
     public ImgEntity(String id, AdsEntity ads, Long size, String title, byte[] context) {
         this.id = id;
         this.ads = ads;
         this.size = size;
         this.title = title;
-        this.context = context;
+        this.content = context;
     }
 
     public ImgEntity() {
@@ -84,12 +87,12 @@ public class ImgEntity implements Serializable {
         this.title = title;
     }
 
-    public byte[] getContext() {
-        return context;
+    public byte[] getContent() {
+        return content;
     }
 
-    public void setContext(byte[] context) {
-        this.context = context;
+    public void setContent(byte[] content) {
+        this.content = content;
     }
 
     @Override
@@ -116,7 +119,7 @@ public class ImgEntity implements Serializable {
 
     @Override
     public String toString() {
-        return "ImgEntity{" + "id=" + id + ", ads=" + ads + ", size=" + size + ", title=" + title + ", context=" + context.length + '}';
+        return "ImgEntity{" + "id=" + id + ", ads=" + ads + ", size=" + size + ", title=" + title + ", context=" + content.length + '}';
     }
-    
+
 }

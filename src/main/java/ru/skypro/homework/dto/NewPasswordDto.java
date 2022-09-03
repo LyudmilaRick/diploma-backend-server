@@ -8,10 +8,11 @@ import lombok.Data;
  */
 @Data
 @Schema(description = "Данные для смены пароля")
-public class NewPassword {
+public class NewPasswordDto {
 
     @Schema(description = "Текущий пароль")
     private String currentPassword;
     @Schema(description = "Значение нового пароля")
     private String newPassword;
+
 }

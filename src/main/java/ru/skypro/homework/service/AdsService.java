@@ -1,11 +1,12 @@
 package ru.skypro.homework.service;
 
-import ru.skypro.homework.dto.Ads;
+import org.springframework.web.multipart.MultipartFile;
+import ru.skypro.homework.dto.AdsDto;
 import ru.skypro.homework.dto.AdsComment;
-import ru.skypro.homework.dto.CreateAds;
-import ru.skypro.homework.dto.FullAds;
-import ru.skypro.homework.dto.ResponseWrapperAds;
-import ru.skypro.homework.dto.ResponseWrapperComment;
+import ru.skypro.homework.dto.CreateAdsDto;
+import ru.skypro.homework.dto.FullAdsDto;
+import ru.skypro.homework.dto.ResponseWrapperAdsDto;
+import ru.skypro.homework.dto.ResponseWrapperCommentDto;
 
 public interface AdsService {
 
@@ -14,14 +15,15 @@ public interface AdsService {
      *
      * @return объект, содержащий список объявлений.
      */
-    ResponseWrapperAds getAllAds();
+    ResponseWrapperAdsDto getAllAds();
 
     /**
      * Получить список всех собственных объявлений.
      *
+     * @param username аккаунт пользователя.
      * @return объект, содержащий список объявлений.
      */
-    ResponseWrapperAds getMeAds(String authority, Object credentials, Object details, Object principal);
+    ResponseWrapperAdsDto getMeAds(String username);
 
     /**
      * Получить все данные по заданному объявлению.
@@ -29,24 +31,26 @@ public interface AdsService {
      * @param adsKey ключ записи объявления.
      * @return объект, содржажий все реквизиты объявления.
      */
-    FullAds getAds(Integer adsKey);
+    FullAdsDto getAds(Integer adsKey);
 
     /**
      * Добавляет новоё объявление.
      *
+     * @param username аккаунт пользователя.
      * @param body объект с данными из тела запроса.
      * @return объект, содржажий реквизиты объявления.
      */
-    Ads addAds(CreateAds body);
+    AdsDto addAds(String username, CreateAdsDto body);
 
     /**
      * Изменить данные заданного объявления.
      *
+     * @param username аккаунт пользователя.
      * @param adsKey ключ записи объявления.
      * @param body объект с новыми данными из тела запроса.
      * @return объект, содржажий реквизиты объявления.
      */
-    Ads updateAds(Integer adsKey, Ads body);
+    AdsDto updateAds(String username, Integer adsKey, AdsDto body);
 
     /**
      * Удалить объявление по заданному идентификатору.
@@ -61,7 +65,7 @@ public interface AdsService {
      * @param adsKey ключ записи объявления.
      * @return объект, содержащий список всех комментариев.
      */
-    ResponseWrapperComment getAllComments(Integer adsKey);
+    ResponseWrapperCommentDto getAllComments(Integer adsKey);
 
     /**
      * Получить данные комментария по заданному объявлению.
@@ -75,30 +79,31 @@ public interface AdsService {
     /**
      * Добавляет новый комментарий к существующему объявлению.
      *
+     * @param username аккаунт пользователя.
      * @param adsKey ключ записи объявления.
      * @param body объект с новыми данными из тела запроса.
      * @return объект, содржажий реквизиты комментария.
      */
-    AdsComment addComment(Integer adsKey, AdsComment body);
+    AdsComment addComment(String username, Integer adsKey, AdsComment body);
 
     /**
      * Изменить содержимое комментария по заданному объявлению.
      *
+     * @param username аккаунт пользователя.
      * @param adsKey ключ записи объявления.
      * @param comKey ключ записи комментария.
      * @param body объект с новыми данными из тела запроса.
      * @return объект, содржажий реквизиты комментария.
      */
-    AdsComment updateComment(Integer adsKey, Integer comKey, AdsComment body);
+    AdsComment updateComment(String username, Integer adsKey, Integer comKey, AdsComment body);
 
     /**
      * Удаляет существующий комментарий к объявлению.
      *
      * @param adsKey ключ записи объявления.
      * @param comKey ключ записи комментария.
-     * @return пустой объект.
      */
-    Void deleteComment(Integer adsKey, Integer comKey);
+    void deleteComment(Integer adsKey, Integer comKey);
 
     /**
      * Сохраняет на сервере сайта картинку, полученную от клиента.
@@ -116,4 +121,11 @@ public interface AdsService {
      */
     byte[] getImage(String imgKey);
 
+    /**
+     * Возвращает идентификатор сохраненной картинки по её ключу.
+     * как итог операции сохранения этой картинки в БД
+     * @param file изображение
+     * @return идентиификатор
+     */
+    String upLoadAdsImg(MultipartFile file);
 }

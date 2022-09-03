@@ -15,38 +15,43 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import ru.skypro.homework.dto.LoginReq;
-import ru.skypro.homework.dto.RegisterReq;
+import ru.skypro.homework.dto.LoginReqDto;
+import ru.skypro.homework.dto.RegisterReqDto;
 import ru.skypro.homework.dto.Role;
 import ru.skypro.homework.service.AuthService;
 
 import static ru.skypro.homework.dto.Role.USER;
+import static ru.skypro.homework.models.Constants.*;
 
+/**
+ * Контроллер обработки запросов аутентификации и регистрации новых пользователей.
+ */
 @Slf4j
 @RestController
-@CrossOrigin(value = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true",
+        allowedHeaders = "*", methods = {RequestMethod.POST})
 @RequiredArgsConstructor
 @Tag(name = "Авторизация", description = "Методы регистрации и аутентификации на сайте.")
 public class AuthController {
 
     private final AuthService authService;
 
-    @Operation(tags={ "Авторизация" }, summary = "Аутентификация", description = "Позволяет пользователю аутентифицироваться в собственном кабинете на сервере.")
-//    @ApiResponses(value = { 
-//        @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "*/*", schema = @Schema())),
-//        @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = "*/*", schema = @Schema())),
-//        @ApiResponse(responseCode = "401", description = "Unauthorized"),
-//        @ApiResponse(responseCode = "403", description = "Forbidden"),
-//        @ApiResponse(responseCode = "404", description = "Not Found") })
-//    @RequestMapping(value = "/login",
-//        produces = { "*/*" }, 
-//        consumes = { "application/json" }, 
-//        method = RequestMethod.POST)
+    /**
+     * Обработка POST запроса аутентификации.
+     * <p>
+     * Позволяет пользователю аутентифицироваться в собственном кабинете на сервере.
+     *
+     * @param body тело запроса, описанное сущностью {
+     * @see LoginReqDto}.
+     * @return объект ответа, содержащий соответствующую протоколу сущность.
+     */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Parameter(in = ParameterIn.DEFAULT, description = "Данные для авторизации", required=true, schema=@Schema()) @Valid @RequestBody LoginReq body) {
-        log.debug("Invoke method login");
+    @Operation(tags = {"Авторизация"}, summary = "Аутентификация", description = "Позволяет пользователю аутентифицироваться в собственном кабинете на сервере.")
+    public ResponseEntity<String> login(@Parameter(in = ParameterIn.DEFAULT, description = "Данные для авторизации", required = true, schema = @Schema()) @Valid @RequestBody LoginReqDto body) {
+        log.info(INVOKE_STR_1, "login", body.getUsername());
 
         if (authService.login(body.getUsername(), body.getPassword())) {
             return ResponseEntity.ok().build();
@@ -55,21 +60,19 @@ public class AuthController {
         }
     }
 
-    @Operation(tags={ "Авторизация" }, summary = "Регистрация", description = "Позволяет новому пользователю зарегистрироваться на сервере.")
-//    @ApiResponses(value = { 
-//        @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "*/*", schema = @Schema())),
-//        @ApiResponse(responseCode = "201", description = "Created"),
-//        @ApiResponse(responseCode = "401", description = "Unauthorized"),
-//        @ApiResponse(responseCode = "403", description = "Forbidden"),
-//        @ApiResponse(responseCode = "404", description = "Not Found") })
-//    @RequestMapping(value = "/register",
-//        produces = { "*/*" }, 
-//        consumes = { "application/json" }, 
-//        method = RequestMethod.POST)
+    /**
+     * Обработка POST запроса регистрации пользователя.
+     * <p>
+     * Позволяет новому пользователю зарегистрироваться на сервере.
+     *
+     * @param body тело запроса, описанное сущностью {
+     * @see RegisterReqDto}.
+     * @return объект ответа, содержащий соответствующую протоколу сущность.
+     */
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Parameter(in = ParameterIn.DEFAULT, description = "Данные для регистрации", required=true, schema=@Schema()) @Valid @RequestBody RegisterReq body) {
-        log.debug("Invoke method register");
-
+    @Operation(tags = {"Авторизация"}, summary = "Регистрация", description = "Позволяет новому пользователю зарегистрироваться на сервере.")
+    public ResponseEntity<String> register(@Parameter(in = ParameterIn.DEFAULT, description = "Данные для регистрации", required = true, schema = @Schema()) @Valid @RequestBody RegisterReqDto body) {
+        log.info(INVOKE_STR_1 , "register", body.getUsername());
         Role role = body.getRole() == null ? USER : body.getRole();
         if (authService.register(body, role)) {
             return ResponseEntity.ok().build();

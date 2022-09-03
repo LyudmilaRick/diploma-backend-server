@@ -1,14 +1,21 @@
 package ru.skypro.homework.service;
 
-import ru.skypro.homework.dto.User;
+import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.dto.CreateUser;
-import ru.skypro.homework.dto.NewPassword;
-import ru.skypro.homework.dto.ResponseWrapperUser;
+import ru.skypro.homework.dto.NewPasswordDto;
+import ru.skypro.homework.dto.ResponseWrapperUserDto;
 
 public interface UserService {
+
     CreateUser addUser(CreateUser user);
-    User getUser(Integer id);
-    ResponseWrapperUser getUsers();
-    User updateUser(User user);
-    NewPassword setPassword(String userName, String oldPassword, String newPassword);
+
+    ResponseWrapperUserDto getUsers();
+
+    UserDto getUser(Integer id);
+
+    UserDto getUser(String name);
+
+    UserDto updateUser(String username, UserDto user);
+
+    NewPasswordDto newPassword(String oldPassword, String newPassword);
 }

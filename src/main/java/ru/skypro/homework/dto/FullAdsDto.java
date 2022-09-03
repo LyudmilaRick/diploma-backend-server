@@ -2,14 +2,13 @@ package ru.skypro.homework.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import ru.skypro.homework.models.AdsEntity;
 
 /**
  * Структура данных, описывающая данные объявления с информацией об авторе, создавшем его.
  */
 @Data
 @Schema(description = "Полная информация об объявлении и его авторе")
-public class FullAds {
+public class FullAdsDto {
 
     @Schema(description = "Имя автора объявления")
     private String authorFirstName;
@@ -30,7 +29,4 @@ public class FullAds {
     @Schema(description = "Заголовок объявления")
     private String title;
 
-    public FullAds(AdsEntity entity) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
 }

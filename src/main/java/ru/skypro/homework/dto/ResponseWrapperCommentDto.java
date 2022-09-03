@@ -9,7 +9,7 @@ import lombok.Data;
  */
 @Data
 @Schema(description = "Оболочка ответа по комментариям к объявлению")
-public class ResponseWrapperComment {
+public class ResponseWrapperCommentDto {
     @Schema(description = "Количество записей")
     private Integer count;
     @Schema(description = "Список данных пользователя")
